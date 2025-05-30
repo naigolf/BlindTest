@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Blind Test เครื่องดื่ม5</title>
+  <title>Blind Test เครื่องดื่ม6</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -440,39 +440,7 @@
 
 
     <script>
-function sendToGoogleSheet() {
-  const testName = testNameInput.value.trim();
-  if (!testName) {
-    alert("กรุณากรอกชื่อการทดสอบก่อนส่งข้อมูลไปยัง Google Sheet");
-    return;
-  }
 
-  if (votes.length === 0) {
-    alert("ยังไม่มีข้อมูลการโหวตให้ส่ง");
-    return;
-  }
-
-  const payload = {
-    testName: testName,
-    votes: votes
-  };
-
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  })
-  .then(res => res.text())
-  .then(response => {
-    alert("✅ ส่งข้อมูลสำเร็จ: " + response);
-  })
-  .catch(err => {
-    console.error("❌ Error sending to Google Sheet:", err);
-    alert("❌ เกิดข้อผิดพลาดในการส่งข้อมูล");
-  });
-}
 </script>
 
 
