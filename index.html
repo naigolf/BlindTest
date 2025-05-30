@@ -286,28 +286,24 @@
       const ctx = document.getElementById("resultsChart").getContext("2d");
 
 
-      chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'คะแนนรวม',
-            data: data,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              precision: 0
-            }
-          }
-        }
-      });
+chart = new Chart(ctx, {
+  type: "bar",
+  data: {
+    labels,
+    datasets: [{
+      label: "จำนวนคะแนนรวม",
+      data,
+      backgroundColor: "rgba(75, 192, 192, 0.6)"
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: { beginAtZero: true }
+    }
+  }
+});
+
     }
 
 
@@ -317,19 +313,15 @@
       
     }
 
-    function openDrinkConfig() {
-      const current = drinks.join(", ");
-      const newInput = prompt("ใส่ชื่อเครื่องดื่มคั่นด้วยเครื่องหมายคอมม่า (,)", current);
-      if (newInput !== null) {
-        const newDrinks = newInput.split(",").map(d => d.trim()).filter(Boolean);
-        if (newDrinks.length > 0) {
-          localStorage.setItem('blindTestDrinks', JSON.stringify(newDrinks));
-          location.reload();
-        } else {
-          alert("กรุณาใส่ชื่อเครื่องดื่มอย่างน้อย 1 รายการ");
-        }
-      }
-    }
+function openDrinkConfig() {
+  const input = prompt("กรุณากรอกชื่อเครื่องดื่มใหม่ (คั่นด้วย ,)", drinks.join(","));
+  if (input) {
+    drinks = input.split(",").map(d => d.trim()).filter(Boolean);
+    localStorage.setItem('blindTestDrinks', JSON.stringify(drinks));
+    populateDrinkDropdowns();
+    updateAllDisplays();
+  }
+}
 
     function closeDrinkConfig() {
       document.getElementById("configModal").style.display = "none";
@@ -354,13 +346,13 @@
     }
 
     // --- START: เพิ่มฟังก์ชัน resetStoredData ---
-   function resetStoredData() {
-      if (confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตข้อมูลทั้งหมด?")) {
-        localStorage.removeItem('blindTestDrinks');
-        localStorage.removeItem('blindTestVotes');
-        location.reload();
-      }
-    }
+function resetStoredData() {
+  if (confirm("คุณแน่ใจว่าต้องการล้างข้อมูลทั้งหมดหรือไม่?")) {
+    localStorage.removeItem('blindTestDrinks');
+    localStorage.removeItem('blindTestVotes');
+    location.reload();
+  }
+}
     // --- END: เพิ่มฟังก์ชัน resetStoredData ---
 
     // --- START: สร้างฟังก์ชัน updateAllDisplays เพื่อลดโค้ดซ้ำซ้อน ---
