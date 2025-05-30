@@ -285,77 +285,50 @@
       if (chart) chart.destroy();
       const ctx = document.getElementById("resultsChart").getContext("2d");
 
+
       chart = new Chart(ctx, {
-        type: "bar",
+        type: 'bar',
         data: {
-          labels,
+          labels: labels,
           datasets: [{
-            label: "คะแนนรวม",
-            data,
-            backgroundColor: "rgba(0, 150, 200, 0.6)"
+            label: 'คะแนนรวม',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
           }]
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false, // เพิ่มเพื่อให้ปรับขนาดได้ดีขึ้น
           scales: {
             y: {
               beginAtZero: true,
-              ticks: { precision: 0 }
+              precision: 0
             }
-          },
-          plugins: {
-            tooltip: { enabled: true },
-            legend: { display: false }
           }
-        },
-        plugins: [{
-          id: 'valueOnTop',
-          afterDatasetsDraw(chartInstance) {
-            const { ctx, data: chartData, chartArea: { top }, scales: { y } } = chartInstance; // เปลี่ยนชื่อ data เป็น chartData
-            ctx.save();
-            chartInstance.getDatasetMeta(0).data.forEach((bar, i) => {
-              const val = chartData.datasets[0].data[i];
-              if (val > 0) {
-                const x = bar.x;
-                const yPos = bar.y;
-                ctx.fillStyle = "#000";
-                ctx.font = "14px sans-serif";
-                ctx.textAlign = "center";
-                const valueY = yPos - 6;
-                const minY = top + 14;
-                ctx.fillText(val, x, valueY < minY ? minY : valueY);
-              }
-            });
-            ctx.restore();
-          }
-        }]
+        }
       });
     }
 
+
+
+
+
+      
+    }
+
     function openDrinkConfig() {
-      const modal = document.getElementById("configModal");
-      const overlay = document.getElementById("modalOverlay");
-      const container = document.getElementById("drinkInputs");
-
-      container.innerHTML = "";
-      drinks.forEach((drink, i) => {
-        const label = document.createElement("label");
-        label.textContent = `ชื่อเครื่องดื่ม ${i + 1}:`;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = drink;
-        input.dataset.index = i;
-        input.placeholder = `เช่น ${defaultDrinksList[i] || 'เครื่องดื่ม'}`; // ใช้ default list สำหรับ placeholder
-
-        container.appendChild(label);
-        container.appendChild(document.createElement("br"));
-        container.appendChild(input);
-        container.appendChild(document.createElement("br"));
-      });
-
-      modal.style.display = "block";
-      overlay.style.display = "block";
+      const current = drinks.join(", ");
+      const newInput = prompt("ใส่ชื่อเครื่องดื่มคั่นด้วยเครื่องหมายคอมม่า (,)", current);
+      if (newInput !== null) {
+        const newDrinks = newInput.split(",").map(d => d.trim()).filter(Boolean);
+        if (newDrinks.length > 0) {
+          localStorage.setItem('blindTestDrinks', JSON.stringify(newDrinks));
+          location.reload();
+        } else {
+          alert("กรุณาใส่ชื่อเครื่องดื่มอย่างน้อย 1 รายการ");
+        }
+      }
     }
 
     function closeDrinkConfig() {
@@ -381,19 +354,11 @@
     }
 
     // --- START: เพิ่มฟังก์ชัน resetStoredData ---
-    function resetStoredData() {
-      if (confirm("คุณต้องการรีเซ็ตข้อมูลการโหวตและชื่อเครื่องดื่มทั้งหมดที่บันทึกไว้ใช่หรือไม่?")) {
-        localStorage.removeItem('blindTestVotes');
+   function resetStoredData() {
+      if (confirm("คุณแน่ใจหรือไม่ว่าต้องการรีเซ็ตข้อมูลทั้งหมด?")) {
         localStorage.removeItem('blindTestDrinks');
-
-        votes = [];
-        drinks = [...defaultDrinksList]; // รีเซ็ต drinks กลับเป็นค่าเริ่มต้น
-
-        testerName.value = ""; // ล้างชื่อผู้ทดสอบใน input
-        populateDrinkDropdowns(); // อัปเดต dropdowns
-        updateAllDisplays(); // อัปเดตตารางและกราฟทั้งหมด
-
-        alert("ข้อมูลทั้งหมดถูกรีเซ็ตแล้ว");
+        localStorage.removeItem('blindTestVotes');
+        location.reload();
       }
     }
     // --- END: เพิ่มฟังก์ชัน resetStoredData ---
@@ -409,6 +374,13 @@
 
     // เรียกฟังก์ชันอัปเดตต่างๆ เพื่อแสดงข้อมูลที่โหลดมาตอนเริ่ม
     updateAllDisplays();
+
+
+
+
+
+
+    
 
   </script>
 
