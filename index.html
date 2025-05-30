@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Blind Test เครื่องดื่ม</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ... (CSS styles เดิมทั้งหมด) ... */
+    h1 span {
+      font-size: 0.5em;
+      color: gray;
+    }
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      max-width: 100%;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+      text-align: center;
+      padding: 8px;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 5px 2px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box; /* เพิ่มเพื่อให้ padding ไม่ทำให้เกิน max-width */
+    }
+    canvas {
+      margin-top: 30px;
+      max-width: 100%;
+    }
+    .button-container {
+      text-align: right;
+      margin-bottom: 10px;
+      display: flex; /* เพิ่ม flexbox */
+      flex-wrap: wrap; /* ให้ปุ่มขึ้นบรรทัดใหม่ถ้าไม่พอ */
+      justify-content: flex-end; /* จัดปุ่มไปทางขวา */
+    }
+    .button-container button { /* กำหนด margin ให้ปุ่มใน container */
+        margin-left: 5px;
+    }
+    .input-group { /* สำหรับจัดกลุ่ม label และ input */
+        margin-bottom: 10px;
+    }
+    @media (min-width: 600px) {
+      input, select, button {
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Blind Test เครื่องดื่ม <span>Cr. NaiGolf</span></h1>
+
+  <div class="button-container">
+    <button onclick="sendToGoogleSheet()" id="sendToSheetButton" style="background-color: #cceeff;">📤 ส่งข้อมูลไป Sheet</button>
+    <button onclick="resetStoredData()" style="background-color: #ffcccc;">🔄 รีเซ็ตข้อมูลทั้งหมด</button>
+    <button onclick="openDrinkConfig()">⚙️ ตั้งค่าเครื่องดื่ม</button>
+  </div>
+
+  <div class="input-group">
+    <label for="testNameInput">ชื่อการทดสอบ (Test Name):</label><br>
+    <input type="text" id="testNameInput" placeholder="เช่น ทดสอบโค้กรอบ 1">
+  </div>
+  <div class="input-group">
+    <label for="testerName">ชื่อผู้ทดสอบ:</label><br>
+    <input type="text" id="testerName" placeholder="เช่น a">
+  </div>
+    
+  <div class="input-group">
+    <label>เลือกเครื่องดื่ม (เรียงลำดับความชอบ):</label><br>
+    <select id="rank1"><option value="">อันดับ 1</option></select>
+    <select id="rank2"><option value="">อันดับ 2</option></select>
+    <select id="rank3"><option value="">อันดับ 3</option></select><br>
+  </div>
+
+  <button onclick="submitVote()">ส่งคะแนน</button>
+  
+  <h3>ผลโหวต (รายคน)</h3>
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>ชื่อผู้ทดสอบ</th>
+        <th>อันดับ 1</th>
+        <th>อันดับ 2</th>
+        <th>อันดับ 3</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody"></tbody>
+  </table>
+
+  <h3>สรุปอันดับ 1</h3>
+  <table id="rank1Summary">
+  <thead>
+    <tr>
+      <th>ชื่อเครื่องดื่ม</th>
+      <th>จำนวนคนโหวต</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>สรุปอันดับ 2</h3>
+<table id="rank2Summary">
+  <thead>
+    <tr>
+      <th>ชื่อเครื่องดื่ม</th>
+      <th>จำนวนคนโหวต</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>สรุปอันดับ 3</h3>
+<table id="rank3Summary">
+  <thead>
+    <tr>
+      <th>ชื่อเครื่องดื่ม</th>
+      <th>จำนวนคนโหวต</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+  <h3>คะแนนรวมแต่ละเครื่องดื่ม</h3>
+  <table id="summaryTable">
+    <thead>
+      <tr>
+        <th>เครื่องดื่ม</th>
+        <th>คะแนนรวม</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody"></tbody>
+  </table>
+
+  <canvas id="resultsChart" height="300"></canvas>
+
+  <div id="configModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #ccc; padding:20px; z-index:1000; max-width:90%; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+    <h3>ตั้งชื่อเครื่องดื่ม</h3>
+    <div id="drinkInputs"></div>
+    <button onclick="saveDrinkConfig()">บันทึก</button>
+    <button onclick="closeDrinkConfig()">ยกเลิก</button>
+  </div>
+  <div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.2); z-index:999;" onclick="closeDrinkConfig()"></div>
+
+  <script>
+    // !!! สำคัญ: ใส่ URL ของ Google Apps Script Web App ที่คุณได้ Deploy ไว้ตรงนี้ !!!
+    const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL'; // <--- แก้ไข URL ตรงนี้
+
+    const defaultDrinksList = ["แก้ว1", "แก้ว2", "แก้ว3", "แก้ว4", "แก้ว5", "แก้ว6", "แก้ว7", "แก้ว8"];
+    let drinks = [...defaultDrinksList];
+    let votes = [];
+
+    // --- โหลด Test Name จาก localStorage ---
+    const testNameInput = document.getElementById('testNameInput');
+    const storedTestName = localStorage.getItem('blindTestTestName');
+    if (storedTestName) {
+        testNameInput.value = storedTestName;
+    }
+    testNameInput.addEventListener('input', () => {
+        localStorage.setItem('blindTestTestName', testNameInput.value.trim());
+    });
+    // --- สิ้นสุดการโหลด Test Name ---
+
+
+    const storedDrinks = localStorage.getItem('blindTestDrinks');
+    if (storedDrinks) {
+      try {
+        const parsedDrinks = JSON.parse(storedDrinks);
+        if (Array.isArray(parsedDrinks) && parsedDrinks.length > 0) {
+            drinks = parsedDrinks;
+        } else {
+            localStorage.removeItem('blindTestDrinks');
+        }
+      } catch (e) {
+        console.error("Error parsing stored drinks:", e);
+        localStorage.removeItem('blindTestDrinks');
+      }
+    }
+
+    const storedVotes = localStorage.getItem('blindTestVotes');
+    if (storedVotes) {
+      try {
+        const parsedVotes = JSON.parse(storedVotes);
+        if (Array.isArray(parsedVotes)) {
+            votes = parsedVotes;
+        } else {
+            localStorage.removeItem('blindTestVotes');
+        }
+      } catch (e) {
+        console.error("Error parsing stored votes:", e);
+        localStorage.removeItem('blindTestVotes');
+      }
+    }
+
+    function populateDrinkDropdowns() {
+      [rank1, rank2, rank3].forEach(select => {
+        const firstOptionText = `อันดับ ${select.id === 'rank1' ? 1 : select.id === 'rank2' ? 2 : 3}`;
+        select.innerHTML = `<option value="">${firstOptionText}</option>`;
+        drinks.forEach(d => {
+          const option = document.createElement("option");
+          option.value = d;
+          option.textContent = d;
+          select.appendChild(option);
+        });
+      });
+    }
+    populateDrinkDropdowns();
+
+    function submitVote() {
+      const name = testerName.value.trim();
+      const r1 = rank1.value, r2 = rank2.value, r3 = rank3.value;
+
+      if (!name || !r1) {
+        alert("กรุณากรอกชื่อผู้ทดสอบ และเลือกอย่างน้อยอันดับ 1");
+        return;
+      }
+
+      const ranks = [r1, r2, r3].filter(Boolean);
+      if (new Set(ranks).size !== ranks.length) {
+        alert("เลือกรายการซ้ำกัน กรุณาเลือกไม่ซ้ำกัน");
+        return;
+      }
+
+      votes.push({ name, ranks });
+      localStorage.setItem('blindTestVotes', JSON.stringify(votes));
+      testerName.value = "";
+      [rank1, rank2, rank3].forEach(select => select.selectedIndex = 0);
+      updateAllDisplays();
+    }
+
+    function updateTable() {
+      resultsBody.innerHTML = "";
+      votes.forEach(vote => {
+        const row = resultsBody.insertRow();
+        row.insertCell().textContent = vote.name;
+        row.insertCell().textContent = vote.ranks[0] || "-";
+        row.insertCell().textContent = vote.ranks[1] || "-";
+        row.insertCell().textContent = vote.ranks[2] || "-";
+      });
+    }
+
+    function updateSummary() {
+      const countMap = {};
+      drinks.forEach(d => countMap[d] = 0);
+      votes.forEach(vote => {
+        vote.ranks.forEach(drink => {
+          if (countMap.hasOwnProperty(drink)) {
+             countMap[drink]++;
+          }
+        });
+      });
+      const sortedSummary = Object.entries(countMap).sort((a, b) => b[1] - a[1]);
+      summaryBody.innerHTML = "";
+      sortedSummary.forEach(([drink, score]) => {
+        const row = summaryBody.insertRow();
+        row.insertCell().textContent = drink;
+        row.insertCell().textContent = score;
+      });
+    }
+
+    function updateRankSummary() {
+      const rankCounts = [{}, {}, {}];
+      drinks.forEach(drink => {
+        rankCounts[0][drink] = 0;
+        rankCounts[1][drink] = 0;
+        rankCounts[2][drink] = 0;
+      });
+      votes.forEach(vote => {
+        vote.ranks.forEach((drink, i) => {
+          if (rankCounts[i] && rankCounts[i].hasOwnProperty(drink)) {
+             rankCounts[i][drink]++;
+          }
+        });
+      });
+      rankCounts.forEach((countMap, i) => {
+        const tbody = document.querySelector(`#rank${i + 1}Summary tbody`);
+        tbody.innerHTML = "";
+        const sorted = Object.entries(countMap).sort((a, b) => b[1] - a[1]);
+        sorted.forEach(([drink, count]) => {
+          const row = tbody.insertRow();
+          row.insertCell().textContent = drink;
+          row.insertCell().textContent = count;
+        });
+      });
+    }
+    
+    let chart;
+    function updateChart() {
+      const countMap = {};
+      drinks.forEach(d => countMap[d] = 0);
+      votes.forEach(vote => {
+        vote.ranks.forEach(drink => {
+          if (countMap.hasOwnProperty(drink)) {
+            countMap[drink]++;
+          }
+        });
+      });
+      const labels = [...drinks];
+      const data = labels.map(d => countMap[d] || 0);
+      if (chart) chart.destroy();
+      const ctx = document.getElementById("resultsChart").getContext("2d");
+      chart = new Chart(ctx, {
+        type: "bar", data: { labels, datasets: [{ label: "คะแนนรวม", data, backgroundColor: "rgba(0, 150, 200, 0.6)" }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 }}}, plugins: { tooltip: { enabled: true }, legend: { display: false }}},
+        plugins: [{ id: 'valueOnTop', afterDatasetsDraw(chartInstance) { const { ctx, data: chartData, chartArea: { top }, scales: {y} } = chartInstance; ctx.save(); chartInstance.getDatasetMeta(0).data.forEach((bar, i) => { const val = chartData.datasets[0].data[i]; if (val > 0) { const x = bar.x; const yPos = bar.y; ctx.fillStyle = "#000"; ctx.font = "14px sans-serif"; ctx.textAlign = "center"; const valueY = yPos - 6; const minY = top + 14; ctx.fillText(val, x, valueY < minY ? minY : valueY);}}); ctx.restore();}}]
+      });
+    }
+
+    function openDrinkConfig() {
+      const modal = document.getElementById("configModal");
+      const overlay = document.getElementById("modalOverlay");
+      const container = document.getElementById("drinkInputs");
+      container.innerHTML = "";
+      drinks.forEach((drink, i) => {
+        const label = document.createElement("label");
+        label.textContent = `ชื่อเครื่องดื่ม ${i + 1}:`;
+        const input = document.createElement("input");
+        input.type = "text"; input.value = drink; input.dataset.index = i;
+        input.placeholder = `เช่น ${defaultDrinksList[i] || 'เครื่องดื่ม'}`;
+        container.appendChild(label); container.appendChild(document.createElement("br"));
+        container.appendChild(input); container.appendChild(document.createElement("br"));
+      });
+      modal.style.display = "block"; overlay.style.display = "block";
+    }
+
+    function closeDrinkConfig() {
+      document.getElementById("configModal").style.display = "none";
+      document.getElementById("modalOverlay").style.display = "none";
+    }
+
+    function saveDrinkConfig() {
+      const inputs = document.querySelectorAll("#drinkInputs input");
+      const newDrinks = [];
+      inputs.forEach(input => {
+        const index = parseInt(input.dataset.index);
+        const defaultName = defaultDrinksList[index] || `แก้ว${index + 1}`;
+        newDrinks[index] = input.value.trim() || drinks[index] || defaultName;
+      });
+      drinks = newDrinks;
+      localStorage.setItem('blindTestDrinks', JSON.stringify(drinks));
+      populateDrinkDropdowns();
+      updateAllDisplays();
+      closeDrinkConfig();
+    }
+
+    function resetStoredData() {
+      if (confirm("คุณต้องการรีเซ็ตข้อมูลการโหวต, ชื่อเครื่องดื่ม, และชื่อการทดสอบทั้งหมดที่บันทึกไว้ใช่หรือไม่?")) {
+        localStorage.removeItem('blindTestVotes');
+        localStorage.removeItem('blindTestDrinks');
+        localStorage.removeItem('blindTestTestName'); // ลบ Test Name ด้วย
+
+        votes = [];
+        drinks = [...defaultDrinksList];
+        testNameInput.value = ""; // ล้างค่าใน input Test Name
+
+        testerName.value = "";
+        populateDrinkDropdowns();
+        updateAllDisplays();
+        alert("ข้อมูลทั้งหมดถูกรีเซ็ตแล้ว");
+      }
+    }
+
+    function updateAllDisplays() {
+        updateTable(); updateSummary(); updateRankSummary(); updateChart();
+    }
+    updateAllDisplays();
+
+    // --- START: ฟังก์ชันส่งข้อมูลไป Google Sheet ---
+    async function sendToGoogleSheet() {
+        const currentTestName = testNameInput.value.trim();
+        if (!currentTestName) {
+            alert("กรุณากรอก 'ชื่อการทดสอบ (Test Name)' ก่อนส่งข้อมูล");
+            testNameInput.focus();
+            return;
+        }
+        if (votes.length === 0) {
+            alert("ยังไม่มีข้อมูลการโหวตให้ส่ง กรุณาเพิ่มผลโหวตก่อน");
+            return;
+        }
+        if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxiyUdkJFm-80B5xODO5s0WM-o-5qqbj1x3P2O6IYWoWnB5isM1QM4ttOb9K1jNDp05vA/exec' || !GOOGLE_SCRIPT_URL) {
+            alert("กรุณาตั้งค่า URL ของ Google Apps Script Web App ในโค้ด JavaScript ก่อน (ตัวแปร GOOGLE_SCRIPT_URL)");
+            return;
+        }
+
+        const sendButton = document.getElementById('sendToSheetButton');
+        sendButton.disabled = true;
+        sendButton.textContent = 'กำลังส่ง...';
+
+        const dataToSend = {
+            testName: currentTestName,
+            drinksConfig: [...drinks], // ส่งสำเนาของ drinks array ปัจจุบัน
+            votesData: [...votes]      // ส่งสำเนาของ votes array ปัจจุบัน
+        };
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors', //สำคัญมากสำหรับการเรียกข้ามโดเมน
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend)
+            });
+            
+            const result = await response.json();
+
+            if (result.status === "success") {
+                alert(`ข้อมูลสำหรับ '${currentTestName}' ถูกส่งไปยัง Google Sheet เรียบร้อยแล้ว!`);
+                // (ทางเลือก) อาจจะ clear votes หลังจากส่งสำเร็จ ถ้าต้องการเริ่ม test ใหม่ทันที
+                // votes = [];
+                // localStorage.setItem('blindTestVotes', JSON.stringify(votes));
+                // updateAllDisplays();
+            } else {
+                alert(`เกิดข้อผิดพลาดในการส่งข้อมูล: ${result.message || 'ไม่ทราบสาเหตุ'}`);
+                console.error('Error from Apps Script:', result);
+            }
+        } catch (error) {
+            alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ: ${error.message}`);
+            console.error('Fetch error:', error);
+        } finally {
+            sendButton.disabled = false;
+            sendButton.textContent = '📤 ส่งข้อมูลไป Sheet';
+        }
+    }
+    // --- END: ฟังก์ชันส่งข้อมูลไป Google Sheet ---
+
+  </script>
+</body>
+</html>
