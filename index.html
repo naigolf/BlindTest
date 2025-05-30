@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Blind Test เครื่องดื่ม22</title>
+  <title>Blind Test เครื่องดื่ม33</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -145,7 +145,7 @@
     <tbody id="summaryBody"></tbody>
   </table>
 
-  <canvas id="resultsChart" height="300"></canvas>
+  <canvas id="resultsChart" height="250"></canvas>
 
   <div id="configModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #ccc; padding:20px; z-index:1000; max-width:90%; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
     <h3>ตั้งชื่อเครื่องดื่ม</h3>
@@ -157,7 +157,7 @@
 
   <script>
     // !!! สำคัญ: ใส่ URL ของ Google Apps Script Web App ที่คุณได้ Deploy ไว้ตรงนี้ !!!
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiyUdkJFm-80B5xODO5s0WM-o-5qqbj1x3P2O6IYWoWnB5isM1QM4ttOb9K1jNDp05vA/exec'; // <--- แก้ไข URL ตรงนี้
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGnKTWgfbRhDKMJyZ-lB9w4s8_osZ3i8gdeoFN9kt49CLIU_2cPPO7azHCuzYDyGxujg/exec'; // <--- แก้ไข URL ตรงนี้
 
     const defaultDrinksList = ["แก้ว1", "แก้ว2", "แก้ว3", "แก้ว4", "แก้ว5", "แก้ว6", "แก้ว7", "แก้ว8"];
     let drinks = [...defaultDrinksList];
@@ -390,7 +390,7 @@
             alert("ยังไม่มีข้อมูลการโหวตให้ส่ง กรุณาเพิ่มผลโหวตก่อน");
             return;
         }
-        if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxiyUdkJFm-80B5xODO5s0WM-o-5qqbj1x3P2O6IYWoWnB5isM1QM4ttOb9K1jNDp05vA/exec' || !GOOGLE_SCRIPT_URL) {
+        if (GOOGLE_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyGnKTWgfbRhDKMJyZ-lB9w4s8_osZ3i8gdeoFN9kt49CLIU_2cPPO7azHCuzYDyGxujg/exec' || !GOOGLE_SCRIPT_URL) {
             alert("กรุณาตั้งค่า URL ของ Google Apps Script Web App ในโค้ด JavaScript ก่อน (ตัวแปร GOOGLE_SCRIPT_URL)");
             return;
         }
